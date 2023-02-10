@@ -1,0 +1,6 @@
+.place__content {
+    display: flex;
+    justify-content: space-between;
+    width: 242px;
+    align-items: baseline;
+}
