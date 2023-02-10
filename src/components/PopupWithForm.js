@@ -1,6 +1,5 @@
 
 function PopupWithForm({name, title, children, isOpen, onClose}) {
-  // 
   return (
     <div className={`popup ${name}-popup ${(isOpen)? 'popup_opened': ''}`}>
       <div className="popup__container">
