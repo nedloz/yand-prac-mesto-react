@@ -3,18 +3,23 @@ import Api from "../utils/Api"
 import Card from "./Card"
 
 function Main({onEditProfile, onAddPlace, onEditAvatar, onCardClick}) {
-  const [userName, setUserName] = React.useState()
-  const [userDescription, setuserDescription] = React.useState()
-  const [userAvatar, setuserAvatar] = React.useState()
+  const [userName, setUserName] = React.useState('')
+  const [userDescription, setuserDescription] = React.useState('')
+  const [userAvatar, setuserAvatar] = React.useState('')
   const [cards, setCards] = React.useState([])
 
   React.useEffect(() => {
-    Api.getUserInfo().then(res => {
+    Api.getUserInfo()
+      .then(res => {
         setUserName(res.name)
         setuserDescription(res.about)
         setuserAvatar(res.avatar)
       })
-    Api.getCardsinfo().then(res => setCards(res))
+      .catch(err => console.log(err))
+
+    Api.getCardsinfo()
+      .then(res => setCards(res))
+      .catch(err => console.log(err))
   }, [])
 
   return (
@@ -31,7 +36,7 @@ function Main({onEditProfile, onAddPlace, onEditAvatar, onCardClick}) {
             <button className="profile__add-button" type="button" onClick={onAddPlace}></button>
       </section>
       <section className="places">{
-        cards.map(card => <Card key={card._id} card={card} onCardClick={onCardClick}/>)
+        cards.map(card => (<Card key={card._id} card={card} onCardClick={onCardClick}/>))
       }</section>
     </main>
   )

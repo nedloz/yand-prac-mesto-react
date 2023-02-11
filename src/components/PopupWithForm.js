@@ -1,5 +1,5 @@
 
-function PopupWithForm({name, title, children, isOpen, onClose}) {
+function PopupWithForm({name, title, children, isOpen, onClose, buttonText}) {
   return (
     <div className={`popup ${name}-popup ${(isOpen)? 'popup_opened': ''}`}>
       <div className="popup__container">
@@ -9,6 +9,7 @@ function PopupWithForm({name, title, children, isOpen, onClose}) {
         </div>
         <form noValidate className={`popup__form popup__form_type_${name}`} action="#" name={name + '-form'} method="post">
           {children}
+          <input className="popup__button" type="submit" value={buttonText}/>
         </form>
       </div>
     </div>
