@@ -27,6 +27,7 @@ class api {
             headers: this.headers,
             body: JSON.stringify(obj)
         })
+        .then(res => this._checkResponse(res))
     }
     sendUserAvatar(obj) {
         return fetch(`${this.baseUrl}/users/me/avatar`, {
@@ -48,19 +49,15 @@ class api {
         return fetch(`${this.baseUrl}/cards/${cardId}`, {
             method: 'DELETE',
             headers: this.headers
-        }).then(res => this._checkResponse(res))
+        })
+        .then(res => this._checkResponse(res))
     }
-    setLike(cardId) {
+    changeLikeCardStatus(cardId, isLiked) {
         return fetch(`${this.baseUrl}/cards/${cardId}/likes `, {
-            method: 'PUT',
+            method: (isLiked? 'PUT': 'DELETE'),
             headers: this.headers
-        }).then(res => this._checkResponse(res))
-    }
-    removeLike(cardId) {
-        return fetch(`${this.baseUrl}/cards/${cardId}/likes `, {
-            method: 'DELETE',
-            headers: this.headers
-        }).then(res => this._checkResponse(res))
+        })
+        .then(res => this._checkResponse(res))
     }
 }
 const Api = new api({baseUrl: 'https://mesto.nomoreparties.co/v1/cohort-57', headers: { authorization: 'dbacfcec-34ad-4656-89f8-d0ca1da81c55', 'Content-Type': 'application/json' }})

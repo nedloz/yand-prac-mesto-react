@@ -1,42 +1,43 @@
 import React from "react"
-import Api from "../utils/Api"
+import { CurrentUserContext } from "../contexts/CurrentUserContext"
 import Card from "./Card"
 
-function Main({onEditProfile, onAddPlace, onEditAvatar, onCardClick}) {
-  const [userName, setUserName] = React.useState('')
-  const [userDescription, setuserDescription] = React.useState('')
-  const [userAvatar, setuserAvatar] = React.useState('')
-  const [cards, setCards] = React.useState([])
+function Main({
+    onEditAvatar,
+    onEditProfile,
+    onAddPlace,
+    cards,
+    onCardClick,
+    onCardLike,
+    onCardDelete,
 
-  React.useEffect(() => {
-    Api.getUserInfo()
-      .then(res => {
-        setUserName(res.name)
-        setuserDescription(res.about)
-        setuserAvatar(res.avatar)
-      })
-      .catch(err => console.log(err))
+}) {
+  const currentUser = React.useContext(CurrentUserContext)
 
-    Api.getCardsinfo()
-      .then(res => setCards(res))
-      .catch(err => console.log(err))
-  }, [])
+
 
   return (
     <main className="main">
       <section className="profile">
         <div className="profile__card">
-          <button className="profile__image" type="button" style={{ backgroundImage: `url(${userAvatar})` }} onClick={onEditAvatar}></button>
+          <button className="profile__image" type="button" style={{ backgroundImage: `url(${currentUser.avatar})` }} onClick={onEditAvatar}></button>
           <div className="profile__info">
-            <h1 className="profile__name">{userName}</h1>
+            <h1 className="profile__name">{currentUser.name}</h1>
             <button className="profile__edit-button" type="button" onClick={onEditProfile}></button>
-            <p className="profile__description">{userDescription}</p>
+            <p className="profile__description">{currentUser.about}</p>
           </div>
         </div>
             <button className="profile__add-button" type="button" onClick={onAddPlace}></button>
       </section>
       <section className="places">{
-        cards.map(card => (<Card key={card._id} card={card} onCardClick={onCardClick}/>))
+        cards.map(card => (
+        <Card 
+          key = {card._id}
+          card = {card} 
+          onCardClick = {onCardClick} 
+          onCardLike = {onCardLike}
+          onCardDelete = {onCardDelete}
+          /> ))
       }</section>
     </main>
   )
