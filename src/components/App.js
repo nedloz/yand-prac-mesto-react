@@ -17,12 +17,30 @@ import { CurrentUserContext } from '../contexts/CurrentUserContext';
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = React.useState(false)
-  const [AddPlacePopupOpen, setAddPlacePopupOpen] = React.useState(false)
-  const [EditAvatarPopupOpen, setEditAvatarPopupOpen] = React.useState(false)
-  const [isImgPopupOpen, setImgPopupOpen] = React.useState(false)
-  const [selectedCard, setSelectedCard] = React.useState({name: '', link: '#'})
+  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false)
+  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = React.useState(false)
+  const [isImgPopupOpen, setIsImgPopupOpen] = React.useState(false)
+
+  const [selectedCard, setSelectedCard] = React.useState({ name: '', link: '#' })
   const [cards, setCards] = React.useState([])
-  const [currentUser, setCurrentUser ] = React.useState({})
+  const [currentUser, setCurrentUser] = React.useState({})
+  const [isLoading, setIsLoading] = React.useState(false);
+  const isOpen = isEditProfilePopupOpen || isAddPlacePopupOpen || isEditAvatarPopupOpen || isImgPopupOpen
+
+  React.useEffect(() => {
+    function closeByEscape(evt) {
+      if (evt.key === 'Escape') {
+        closeAllPopups();
+      }
+    }
+    if (isOpen) {
+      document.addEventListener('keydown', closeByEscape);
+      return () => {
+        document.removeEventListener('keydown', closeByEscape);
+      }
+    }
+  }, [isOpen])
+
 
   React.useEffect(() => {
     Api.getUserInfo()
@@ -34,107 +52,117 @@ function App() {
   }, [])
 
   const closeAllPopups = () => {
-    setEditAvatarPopupOpen(false)
     setIsEditProfilePopupOpen(false)
-    setAddPlacePopupOpen(false)
-    setImgPopupOpen(false)
-    setSelectedCard({name: '', link: '#'})
+    setIsAddPlacePopupOpen(false)
+    setIsEditAvatarPopupOpen(false)
+    setIsImgPopupOpen(false)
+    setSelectedCard({ name: '', link: '#' })
   }
   const handleEditProfileClick = () => {
     setIsEditProfilePopupOpen(true)
   }
   const handleEditAvatarClick = () => {
-    setEditAvatarPopupOpen(true)
+    setIsEditAvatarPopupOpen(true)
   }
   const handleAddPlaceClick = () => {
-    setAddPlacePopupOpen(true)
+    setIsAddPlacePopupOpen(true)
   }
   const handleCardClick = (card) => {
     setSelectedCard(card)
-    setImgPopupOpen(true)
+    setIsImgPopupOpen(true)
   }
   const handleCardLike = (card) => {
     const isLiked = card.likes.some(i => i._id === currentUser._id);
     Api.changeLikeCardStatus(card._id, !isLiked)
       .then((newCard) => {
-        setCards((state) => state.map((c) => c._id === card._id ? newCard : c ));
+        setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
       })
       .catch(err => console.log(err))
-  }  
+  }
   const handleCardDelete = (deleteCard) => {
     Api.deleteCard(deleteCard._id)
-      .then(()=> setCards(cards.filter(card => card._id !== deleteCard._id)))
+      .then(() => setCards((state) => state.filter((item) => item._id !== deleteCard._id)))
       .catch(err => console.log(err))
   }
   const handleUpdateUser = (data) => {
+    setIsLoading(true)
     Api.sendUserInfo(data)
       .then((userData) => {
         setCurrentUser(userData)
         closeAllPopups()
       })
       .catch(err => console.log(err))
+      .finally(() => setIsLoading(false))
   }
   const handleUpdateAvatar = (avatar) => {
+    setIsLoading(true)
     Api.sendUserAvatar(avatar)
       .then(userData => {
         setCurrentUser(userData)
         closeAllPopups()
       })
+      .catch(err => console.log(err))
+      .finally(() => setIsLoading(false))
   }
   const handleAddPlaceSubmit = (cardData) => {
+    setIsLoading(true)
     Api.sendNewCard(cardData)
       .then(newCard => {
-        setCards([newCard, ...cards]); 
+        setCards([newCard, ...cards]);
         closeAllPopups()
       })
+      .catch(err => console.log(err))
+      .finally(() => setIsLoading(false))
   }
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
-    <div style={{backgroundColor: 'black'}}>
-      <div className='page'>
-        <Header logo={logo}/>
-        <Main 
-               onEditProfile = {handleEditProfileClick} 
-              onEditAvatar = {handleEditAvatarClick} 
-             onAddPlace =  {handleAddPlaceClick}
-            cards = {cards}
-           onCardClick = {handleCardClick}
-          onCardLike = {handleCardLike}
-         onCardDelete= {handleCardDelete}
-        /> 
-        <Footer />
-        <EditProfilePopup
-            isOpen={isEditProfilePopupOpen} 
-           onClose={closeAllPopups}
-          onUpdateUser={handleUpdateUser}
-        />
-        <EditAvatarPopup 
-            isOpen={EditAvatarPopupOpen}
-           onClose={closeAllPopups}
-          onUpdateAvatar={handleUpdateAvatar}
-        />
-        <AddPlacePopup
-            isOpen={AddPlacePopupOpen}
-           onClose={closeAllPopups}
-          onAddPlace={handleAddPlaceSubmit}
-        />
-        <PopupWithForm 
-        name='confirm' 
-        title='Вы уверены?' 
-        onClose={closeAllPopups} 
-        isOpen={false} 
-        buttonText="Да"
-        >
-        </PopupWithForm>
-        <ImagePopup
-          onClose={closeAllPopups}
-          card={selectedCard} 
-          isOpen={isImgPopupOpen}
-        ></ImagePopup>
-    </div>
-  </div>
-  </CurrentUserContext.Provider>
+      <div style={{ backgroundColor: 'black' }}>
+        <div className='page'>
+          <Header logo={logo} />
+          <Main
+            onEditProfile={handleEditProfileClick}
+            onEditAvatar={handleEditAvatarClick}
+            onAddPlace={handleAddPlaceClick}
+            cards={cards}
+            onCardClick={handleCardClick}
+            onCardLike={handleCardLike}
+            onCardDelete={handleCardDelete}
+          />
+          <Footer />
+          <EditProfilePopup
+            isOpen={isEditProfilePopupOpen}
+            onClose={closeAllPopups}
+            onUpdateUser={handleUpdateUser}
+            buttonText={isLoading ? 'Сохранение...' : 'Сохранить'}
+          />
+          <EditAvatarPopup
+            isOpen={isEditAvatarPopupOpen}
+            onClose={closeAllPopups}
+            onUpdateAvatar={handleUpdateAvatar}
+            buttonText={isLoading ? 'Сохранение...' : 'Сохранить'}
+          />
+          <AddPlacePopup
+            isOpen={isAddPlacePopupOpen}
+            onClose={closeAllPopups}
+            onAddPlace={handleAddPlaceSubmit}
+            buttonText={isLoading ? 'Создаем...' : 'Создать'}
+          />
+          <PopupWithForm
+            name='confirm'
+            title='Вы уверены?'
+            onClose={closeAllPopups}
+            isOpen={false}
+            buttonText="Да"
+          />
+          <ImagePopup
+            onClose={closeAllPopups}
+            card={selectedCard}
+            isOpen={isImgPopupOpen}
+          />
+        </div>
+      </div>
+    </CurrentUserContext.Provider>
   )
 }
 
