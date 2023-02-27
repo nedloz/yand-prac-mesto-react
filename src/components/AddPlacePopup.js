@@ -5,10 +5,16 @@ import { useForm } from "../hooks/useForm";
 function AddPlacePopup({ isOpen, onClose, onAddPlace, buttonText }) {
   const { values, handleChange, setValues } = useForm({});
 
+  React.useEffect(() => {
+    setValues({})
+  }, [isOpen]);
+ 
+
+
+
   const handleSubmit = (e) => {
     e.preventDefault()
     onAddPlace(values)
-    setValues({})
   }
 
   return (

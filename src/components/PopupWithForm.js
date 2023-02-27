@@ -13,7 +13,6 @@ function PopupWithForm({ name, title, children, isOpen, onClose, buttonText, onS
           />
         </div>
         <form
-          noValidate
           className={`popup__form popup__form_type_${name}`}
           action="#"
           name={name + '-form'}
